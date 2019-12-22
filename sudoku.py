@@ -27,6 +27,9 @@ def generateBoard():
         
     """
 
+    # Initialize the board
+    board = [[0 for i in range (9)] for j in range (9)]
+
     # Fill out the first box randomly as there are no constraints on what its values can be yet.
     nums = [i for i in range(1, 10)]
     random.shuffle(nums)
@@ -34,22 +37,54 @@ def generateBoard():
         for j in range(3):
             board[i][j] = nums.pop()
 
-    # Fill out box in the top row middle column.
+    # Fill out first 2 rows of box in the top row middle column.
     nums = [i for i in range(1, 10)]
     random.shuffle(nums)
-    removed = []
-    for i in range(3):
+    for i in range(2):
         # Remove numbers already used for that row by first box.
+        removed = []
         for k in board[i][:3]:
-            removed.append(k)
-            nums.remove(k)
+            if k in nums:
+                removed.append(k)
+                nums.remove(k)
         # Fill out row
         for j in range(3, 6):
             board[i][j] = nums.pop()
-        # Add back the removed numbers into a random index if it's not the last row.
-        if(i < 2):
-            for k in removed:
+
+        # Add back the removed numbers into a random index.
+        for k in removed:
+            if len(nums) <= 1:
+                nums.insert(len(nums), k)
+            else:
                 nums.insert(random.choice([x for x in range(len(nums) - 1)]), k)
+    # If the remaining nums are taken by the last row already then keep going back and changing 2nd row so we have 3 for last row
+    enoughForLast = False
+    while enoughForLast == False:
+        for j in range(3, 6):
+            nums.append(board[1][j])
+            board[i][j] = 0
+        random.shuffle(nums)
+        # Remove numbers already used for that row by first box.
+        removed = []
+        for k in board[1][:3]:
+            if k in nums:
+                removed.append(k)
+                nums.remove(k)
+        # Fill out row
+        for j in range(3, 6):
+            board[1][j] = nums.pop()
+        # Add back the removed numbers into a random index.
+        for k in removed:
+            if len(nums) <= 1:
+                nums.insert(len(nums), k)
+            else:
+                nums.insert(random.choice([x for x in range(len(nums) - 1)]), k)
+        # Check if there are 3 candidates for the last row
+        enoughForLast = True
+        for x in range(3):
+            if board[2][x] in nums:
+                enoughForLast = False
+    board[2][3:6] = nums
 
     # The top right box's rows are determined by the other 6 values in the previous boxes' rows.
     for i in range(3):
@@ -68,12 +103,10 @@ def generateBoard():
         nums.remove(board[i][0])
     # Fill out the rest of the first column of the board.    
     for i in range(3, len(board)):
-        board[i][0] = nums.pop()        
+        board[i][0] = nums.pop()
 
-def isValid(board, num, pos):
-    """
-    Used to check is a board is valid depending on a given input in order to assist the solver with its backtracking.
-    """
+    # Use the solver to fill in the rest of the board.
+    return solve(board)[1]        
 
 def solve(board):
     """
@@ -142,7 +175,7 @@ def solve(board):
         return (False, [])
 
 def main():
-    print(solve(board)[1])
+    print(generateBoard())
 
 if __name__ == "__main__":
     main()
