@@ -1,21 +1,5 @@
 import random
 
-# board = [
-#     [0, 0, 0, 0, 0, 0, 0, 0, 0] * 9
-# ]
-
-board = [
-    [3,7,0,0,0,9,0,0,6],
-    [8,0,0,1,0,3,0,7,0],
-    [0,0,0,0,0,0,0,0,8],
-    [0,2,0,0,8,0,0,0,5],
-    [1,8,7,0,0,0,6,4,2],
-    [5,0,0,0,2,0,0,1,0],
-    [7,0,0,0,0,0,0,0,0],
-    [0,5,0,6,0,2,0,0,7],
-    [2,0,0,3,0,0,0,6,1]
-]
-
 def generateBoard():
     """
     Generate a solvable board randomly. The steps are as follows:
@@ -106,7 +90,20 @@ def generateBoard():
         board[i][0] = nums.pop()
 
     # Use the solver to fill in the rest of the board.
-    return solve(board)[1]        
+    solvedBoard = solve(board)
+
+    # Test all cells in a random order to see if removing it still allows for a unique solution
+    cells = list(range(81))
+    random.shuffle(cells)
+
+    for c in cells:
+        i, j = divmod(c, 9)
+        tempBoard = [row[:] for row in solvedBoard]
+        tempBoard2 = [row[:] for row in solvedBoard]
+        tempBoard[i][j] = 0
+        if solve(tempBoard) == solve2(tempBoard2):
+            solvedBoard[i][j] = 0
+    return solvedBoard
 
 def solve(board):
     """
@@ -161,18 +158,69 @@ def solve(board):
     # Check for empty cell whose candidates list is the smallest.
     # If all cells are nonzero, puzzle is solved. If a zero cell has no candidate values, puzzle is unsolvable.
     if fewestIndex == (-1, -1):
-        return (True, board)
+        return board
     else:
         # Try all candidates.
         for i in candidates[fewestIndex[0]][fewestIndex[1]]:
             board[fewestIndex[0]][fewestIndex[1]] = i
             
-            if solve(board)[0]:
-                return (True, board)
-            
+            if solve(board):
+                return board
+
             # Set it back to 0 so backtracking isn't thrown off.
             board[fewestIndex[0]][fewestIndex[1]] = 0
-        return (False, [])
+        return []
+
+def solve2(board):
+# Generate the list of candidate values for each cell while keeping track of the cell with the fewest candidate values
+    values = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    candidates = [[[1,2,3,4,5,6,7,8,9] for i in range (9)] for j in range (9)]
+    for i in range(9):
+        for j in range(9):
+            candidates[i][j] = values.copy()
+
+    fewest, fewestIndex = float("inf"), (-1, -1)
+    for i in range(9):
+        for j in range(9):
+            if board[i][j] > 0:
+                candidates[i][j] = []
+            else:
+                # print(f'j: {j}')
+                # Remove used values in that row, column, and box
+                for k in range(9):
+                    if board[i][k] > 0:
+                        # print(candidates[i][j])
+                        # print(board[i][k])
+                        candidates[i][j].remove(board[i][k])
+                for l in range(9):
+                    if board[l][j] > 0 and board[l][j] in candidates[i][j]:
+                        candidates[i][j].remove(board[l][j])
+                # Find the top left corner of the current subbox to start iterating it by finding its distance from the current cell
+                for m in range(i - (i%3), i - (i%3) + 3):
+                    for n in range(j - (j%3), j - (j%3) + 3):
+                        if board[m][n] > 0 and board[m][n] in candidates[i][j]:
+                            candidates[i][j].remove(board[m][n])
+                # Update the cell with the fewest candidates
+                if len(candidates[i][j]) < fewest:
+                    fewest = len(candidates[i][j])
+                    fewestIndex = (i, j)
+
+    # Check for empty cell whose candidates list is the smallest.
+    # If all cells are nonzero, puzzle is solved. If a zero cell has no candidate values, puzzle is unsolvable.
+    if fewestIndex == (-1, -1):
+        return board
+    else:
+        # Try all candidates.
+        if candidates[fewestIndex[0]][fewestIndex[1]]: candidates[fewestIndex[0]][fewestIndex[1]].reverse()
+        for i in candidates[fewestIndex[0]][fewestIndex[1]]:
+            board[fewestIndex[0]][fewestIndex[1]] = i
+            
+            if solve(board):
+                return board
+
+            # Set it back to 0 so backtracking isn't thrown off.
+            board[fewestIndex[0]][fewestIndex[1]] = 0
+        return []
 
 def main():
     print(generateBoard())
