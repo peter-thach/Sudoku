@@ -1,9 +1,13 @@
 from sudoku import generateBoard, solve
-from tkinter import Tk, Canvas, Frame, Button, BOTH, TOP, BOTTOM
+from tkinter import Tk, Canvas, Frame, Button, Label, BOTH, TOP, BOTTOM, LEFT, RIGHT
+from datetime import datetime
+
+import time
 
 MARGIN = 20  # Pixels around the board
-SIDE = 50  # Width of every board cell.
+SIDE = 60  # Width of every board cell.
 WIDTH = HEIGHT = MARGIN * 2 + SIDE * 9  # Width and height of the whole board
+HEIGHT + 1000
 
 class SudokuUI(Frame):
 
@@ -13,7 +17,7 @@ class SudokuUI(Frame):
         self.board = [row[:] for row in self.start_puzzle]
         tempBoard = [row[:] for row in self.board]
         self.solved_puzzle = solve(tempBoard)
-        Frame.__init__(self, parent)
+        Frame.__init__(self, parent, bg="#FEF2B6")
 
         self.row, self.col = 0, 0
 
@@ -22,10 +26,17 @@ class SudokuUI(Frame):
     def __initUI(self):
         self.parent.title("Sudoku")
         self.pack(fill=BOTH, expand=1)
-        self.canvas = Canvas(self, width=WIDTH, height=HEIGHT)
+        self.canvas = Canvas(self, width=WIDTH, height=HEIGHT, bg="#FEF2B6")
         self.canvas.pack(fill=BOTH, side=TOP)
-        clear_button = Button(self, text="Clear", command=self.__clear_answers)
-        clear_button.pack(fill=BOTH, side=BOTTOM)
+        
+        frame = Frame(self, bg="#FEF2B6")
+        frame.pack(side=LEFT, fill=BOTH)
+        clear_button = Button(self, text="Clear", command=self.__clear_answers, bg="#007bff", fg="white")
+        clear_button.grid(in_=frame, column=0, row=0)
+        self.label = Label(text="", font=('Helvetica', 24), bg="#FEF2B6")
+        self.label.grid(in_=frame, column=2, row=0)
+        self.startTime = datetime.now()
+        self.update_clock()
 
         self.__draw_grid()
         self.__draw_puzzle()
@@ -33,9 +44,14 @@ class SudokuUI(Frame):
         self.canvas.bind("<Button-1>", self.__cell_clicked)
         self.canvas.bind("<Key>", self.__key_pressed)
 
+    def update_clock(self):
+        now = datetime.now()
+        self.label.configure(text=str((now - self.startTime))[:7])
+        self.after(1000, self.update_clock)
+
     def __draw_grid(self):
         for i in range(10):
-            color = "blue" if i % 3 == 0 else "gray"
+            color = "#925242" if i % 3 == 0 else "#CAA67E"
 
             x0 = MARGIN + i * SIDE
             y0 = MARGIN
@@ -58,7 +74,19 @@ class SudokuUI(Frame):
                     x = MARGIN + j * SIDE + SIDE // 2
                     y = MARGIN + i * SIDE + SIDE // 2
                     original = self.start_puzzle[i][j]
-                    color = "black" if answer == original else "sea green"
+                    color = "black" if answer == original else "blue"
+                    # Check for illegitimate value (it exists in that row/column/box) and highlight the duplicate values in red
+                    for k in range(9):
+                        if self.board[i][k] == self.board[i][j] and k != j:
+                            color = "red"
+                    for k in range(9):
+                        if self.board[k][j] == self.board[i][j] and k != i:
+                            color = "red"
+                    for m in range(i - (i%3), i - (i%3) + 3):
+                        for n in range(j - (j%3), j - (j%3) + 3):
+                            if self.board[m][n] == self.board[i][j]:
+                                if not (m == i and n == j):
+                                    color = "red"
                     self.canvas.create_text(
                         x, y, text=answer, tags="numbers", fill=color
                     )
@@ -126,6 +154,7 @@ class SudokuUI(Frame):
 
 if __name__ == '__main__':
     root = Tk()
+    root.configure(bg="red")
     SudokuUI(root)
     root.geometry("%dx%d" % (WIDTH, HEIGHT + 40))
     root.mainloop()
