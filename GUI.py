@@ -9,7 +9,8 @@ class SudokuUI(Frame):
 
     def __init__(self, parent):
         self.parent = parent
-        self.start_puzzle = self.board = generateBoard()
+        self.start_puzzle = generateBoard()
+        self.board = [row[:] for row in self.start_puzzle]
         tempBoard = [row[:] for row in self.board]
         self.solved_puzzle = solve(tempBoard)
         Frame.__init__(self, parent)
@@ -54,8 +55,8 @@ class SudokuUI(Frame):
             for j in range(9):
                 answer = self.board[i][j]
                 if answer != 0:
-                    x = MARGIN + j * SIDE + SIDE / 2
-                    y = MARGIN + i * SIDE + SIDE / 2
+                    x = MARGIN + j * SIDE + SIDE // 2
+                    y = MARGIN + i * SIDE + SIDE // 2
                     original = self.start_puzzle[i][j]
                     color = "black" if answer == original else "sea green"
                     self.canvas.create_text(
@@ -64,6 +65,7 @@ class SudokuUI(Frame):
 
     def __clear_answers(self):
         self.canvas.delete("victory")
+        self.board = [row[:] for row in self.start_puzzle]
         self.__draw_puzzle()
 
     def __cell_clicked(self, event):
@@ -73,12 +75,12 @@ class SudokuUI(Frame):
             self.canvas.focus_set()
 
             # get row and column numbers from x, y coordinates
-            row, col = (y - MARGIN) / SIDE, (x - MARGIN) / SIDE
+            row, col = (y - MARGIN) // SIDE, (x - MARGIN) // SIDE
 
         # if cell was selected already - deselect it
             if (row, col) == (self.row, self.col):
                 self.row, self.col = -1, -1
-            elif self.board[row][col] == 0:
+            elif self.start_puzzle[row][col] == 0:
                 self.row, self.col = row, col
 
         self.__draw_cursor()
@@ -115,7 +117,7 @@ class SudokuUI(Frame):
             tags="victory", fill="dark orange", outline="orange"
         )
         # create text
-        x = y = MARGIN + 4 * SIDE + SIDE / 2
+        x = y = MARGIN + 4 * SIDE + SIDE // 2
         self.canvas.create_text(
             x, y,
             text="You win!", tags="winner",
