@@ -47,7 +47,8 @@ class SudokuUI(Frame):
     def update_clock(self):
         now = datetime.now()
         self.label.configure(text=str((now - self.startTime))[:7])
-        self.after(1000, self.update_clock)
+        if self.board != self.solved_puzzle:
+            self.after(1000, self.update_clock)
 
     def __draw_grid(self):
         for i in range(10):
@@ -93,8 +94,11 @@ class SudokuUI(Frame):
 
     def __clear_answers(self):
         self.canvas.delete("victory")
+        self.canvas.delete("winner")
         self.board = [row[:] for row in self.start_puzzle]
         self.__draw_puzzle()
+        self.startTime = datetime.now()
+        self.update_clock()
 
     def __cell_clicked(self, event):
 

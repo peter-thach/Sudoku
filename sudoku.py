@@ -101,7 +101,7 @@ class Board():
 
         # Use the solver to fill in the rest of the board.
         self.solver(board)
-        solvedBoard = self.solution
+        solvedBoard = [row[:] for row in self.solution]
 
         # Test all cells in a random order to see if removing it still allows for a unique solution
         cells = list(range(81))
@@ -188,8 +188,7 @@ class Board():
             return False
 
 def main():
-    cock = Board([])
-    print(cock.board)
+    print()
 
 if __name__ == "__main__":
     main()
