@@ -1,4 +1,4 @@
-from sudoku import generateBoard, solve
+from sudoku import Board
 from tkinter import Tk, Canvas, Frame, Button, Label, BOTH, TOP, BOTTOM, LEFT, RIGHT
 from datetime import datetime
 
@@ -13,10 +13,10 @@ class SudokuUI(Frame):
 
     def __init__(self, parent):
         self.parent = parent
-        self.start_puzzle = generateBoard()
+        board = Board([])
+        self.start_puzzle = board.board
         self.board = [row[:] for row in self.start_puzzle]
-        tempBoard = [row[:] for row in self.board]
-        self.solved_puzzle = solve(tempBoard)
+        self.solved_puzzle = board.solution
         Frame.__init__(self, parent, bg="#FEF2B6")
 
         self.row, self.col = 0, 0
