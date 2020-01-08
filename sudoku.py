@@ -11,15 +11,6 @@ class Board():
             self.solver(board)
 
     def generateBoard(self):
-        """
-        Generate a solvable board randomly. The steps are as follows:
-            1. Choose the empty cell with the fewest possible candidates. If no such cell exists, the grid is filled
-            and the algorithm should terminate.
-            2. Choose a candidate at random and place it in the cell. Try to recursively fill the grid. If this fails,
-            choose a different candidate at random and retry.
-            3. If all candidates are exhausted, signal failure to the caller.
-            
-        """
 
         # Initialize the board
         board = [[0 for i in range (9)] for j in range (9)]
@@ -117,21 +108,6 @@ class Board():
         return solvedBoard
 
     def solver(self, boardCopy):
-        """
-        The backtracking algorithm to solve a Sudoku puzzle is as follows:
-            1. Generate, for each cell, a list of candidate values by starting with the set of all possible values and eliminating
-            those which appear in the same row, column, and box as the cell being examined.
-            2. Choose one empty cell. If none are available, the puzzle is solved.
-            3. If the cell has no candidate values, the puzzle is unsolveable.
-            4. For each candidate value in the cell, place the value in the cell and try to recursively solve the puzzle.
-        
-        There are two optimizations for this algorithm:
-            1. When choosing a cell, always pick the one with the fewest candidate values. This reduces the branching factor. As 
-            values are added to the grid, the number of candidates for other cells reduces too.
-            2. When analyzing the candidate values for empty cells, it's much quicker to start with the analysis of the previous step 
-            and modify it by removing values along the row, column, and box of the last-modified cell. This is O(N) in the size of the
-            puzzle whereas analyzing from scratch is O(N^3).
-        """
 
         board = [row[:] for row in boardCopy]
 
